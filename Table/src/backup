@@ -1,0 +1,531 @@
+import { useEffect, useState } from "react";
+import { AddIcon } from "./assets/AddSVG";
+import { CloseSVG } from "./assets/XSVG";
+import { FunnelSVG } from "./assets/FunnelSVG";
+import { RefreshIcon } from "./assets/RefreshSVG";
+import { RemoveIcon } from "./assets/RemoveSVG";
+
+function App() {
+  const [expand, setExpand] = useState();
+  const [row, setRow] = useState([]);
+  const [selectedRows, setSelectedRows] = useState([]);
+  const [insideselectedRows, setInsideSelectedRows] = useState([]);
+  const [autosave, setAutoSave] = useState(0);
+  const [ids, setIDS] = useState(0);
+
+  const handleCheckboxChange = (rowId) => {
+    // Toggle the selection status of the row
+    // if(rowId !== -1){
+    setSelectedRows((prevSelectedRows) => {
+      if (prevSelectedRows.includes(rowId)) {
+        if (rowId === -1) {
+          return [];
+        } else {
+          return prevSelectedRows.filter((id) => id !== rowId);
+        }
+      } else {
+        if (rowId === -1) {
+          return [...row.map((e) => e.id), rowId];
+        } else {
+          return [...prevSelectedRows, rowId];
+        }
+      }
+    });
+    // }
+    // else{
+
+    //   setSelectedRows((prevSelectedRows) => {
+    //     if (prevSelectedRows.includes(rowId)) {
+    //       return prevSelectedRows.filter((id) => id !== rowId);
+    //     } else {
+    //       return [row.map((e)=>(e.id)), -1];
+    //     }
+    //   })
+    // }
+    // console.log(row)
+  };
+
+  const handleInsideCheckboxChange = (rowId, mainId) => {
+    // Toggle the selection status of the row
+    setInsideSelectedRows((prevSelectedRows) => {
+      if (prevSelectedRows.includes(rowId)) {
+        if (rowId === -1) {
+          return [];
+        } else {
+          return prevSelectedRows.filter((id) => id !== rowId);
+        }
+      } else {
+        if (rowId === -1) {
+          return [...row[mainId]?.ApointmentData.map((e) => e.id), rowId];
+        } else {
+          return [...prevSelectedRows, rowId];
+        }
+      }
+    });
+    // console.log([...row[mainId]?.ApointmentData.map((e)=>(e.id)), rowId], rowId,'Ap Data')
+  };
+
+  useEffect(() => {
+    console.log(row, "Row");
+  }, [row]);
+
+  function AddRow() {
+    debugger;
+    // setRow([
+    //   ...row,
+    //   {
+    //     id: ids + 1,
+    //     Name: "",
+    //     Date: "",
+    //     "Appointment Library": "",
+    //     ApointmentData: [
+    //       {
+    //         id: 1,
+    //         Subject: "",
+    //         "Created On": "",
+    //         Doctor: "",
+    //         "Start Time": "",
+    //         "End Time": "",
+    //         Decription: "",
+    //       },
+    //     ],
+    //   },
+    // ]);
+    row.push({
+      id: ids + 1,
+      Name: "",
+      Date: "",
+      "Appointment Library": "",
+      ApointmentData: [
+        {
+          id: 1,
+          Subject: "",
+          "Created On": "",
+          Doctor: "",
+          "Start Time": "",
+          "End Time": "",
+          Decription: "",
+        },
+      ],
+    });
+    setIDS(ids + 1);
+    // console.log('addRow')
+  }
+
+  function AddApointmentData(i) {
+    setRow(
+      [...row],
+      row[i].ApointmentData.push({
+        id: row[i].ApointmentData.length + 1,
+        Subject: "",
+        "Created On": "",
+        Doctor: "",
+        "Start Time": "",
+        "End Time": "",
+        Decription: "",
+      })
+    );
+    //   console.log('Add Appointment Working')
+  }
+
+  function RemoveRow() {
+    // setTempRow(row)
+    // debugger
+    // console.log(selectedRows);
+    // let empRow = row
+    // selectedRows.map((data) =>
+    // empRow = empRow.filter((x) => x.id !== data)
+    // )
+    // console.log(empRow,'empRow')
+    // setRow(empRow)
+    // setSelectedRows([]);
+
+    // Remove selected rows from the data
+    setRow((prevData) =>
+      prevData.filter((row) => !selectedRows.includes(row.id))
+    );
+    // Clear the selected rows
+    setSelectedRows([]);
+  }
+
+  const handleCellChange = (rowId, key, value) => {
+    // Update the data with the new value
+    setRow((prevData) =>
+      prevData.map((row) => (row.id === rowId ? { ...row, [key]: value } : row))
+    );
+  };
+
+  return (
+    <>
+      <div className="mx-auto max-w-[80%]">
+        <div className="flex justify-between w-full border-b-2 mb-1  px-2 mb-4">
+          <div className="font-bold flex gap-[5px] text-[15px]">
+            Patient Appointment Bundle -
+            <div className="font-normal">
+              Total Records {row?.length || "0"}
+            </div>
+            <div className="flex gap-[5px] t px-2">
+              |{" "}
+              <div
+                onClick={(e) => {
+                  AddRow();
+                }}
+              >
+                <AddIcon />
+              </div>{" "}
+              <div
+                onClick={(e) => {
+                  RemoveRow();
+                }}
+              >
+                <CloseSVG />
+              </div>
+              <FunnelSVG />
+              <div>
+                <RefreshIcon />
+              </div>
+              <div
+                className="bg-sky-800 text-white cursor-pointer"
+                onClick={(e) =>
+                  autosave === 0 ? setAutoSave(1) : setAutoSave(0)
+                }
+              >
+                {(autosave === 0 && "Auto Save On") || "Auto Save Off"}
+              </div>
+            </div>
+          </div>
+        </div>
+        <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+          <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+            <tr>
+              <th scope="col" className=" flex px-6 py-3">
+                <input
+                  className="mr-2"
+                  type="checkbox"
+                  onChange={() => handleCheckboxChange(-1)}
+                  checked={selectedRows.includes(-1)}
+                />
+                Name
+              </th>
+              <th scope="col" className="px-6 py-3">
+                Date
+              </th>
+              <th scope="col" className="px-6 py-3">
+                Appointment Library
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {row?.map((e, index) => (
+              <>
+                <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 w-fit">
+                  <th
+                    scope="row"
+                    className="flex px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white w-fit"
+                  >
+                    {" "}
+                    <input
+                      type="checkbox"
+                      onChange={() => handleCheckboxChange(e.id)}
+                      checked={selectedRows.includes(e.id)}
+                    />
+                    <div>
+                      {(expand !== index && (
+                        <div
+                          onClick={() => {
+                            expand !== index && setExpand(index);
+                          }}
+                        >
+                          <AddIcon />
+                        </div>
+                      )) || (
+                        <div
+                          onClick={() => {
+                            setExpand(null);
+                          }}
+                        >
+                          <RemoveIcon />
+                        </div>
+                      )}
+                    </div>
+                    <input
+                      className="appearance-none bg-transparent border-none text-sm text-gray-700 mr-3 py-1 px-2 "
+                      type="text"
+                      defaultValue={e?.Name || ""}
+                      placeholder="Full Name"
+                      onChange={(event) => {
+                        autosave === 0
+                          ? handleCellChange(e.id, "Name", event.target.value)
+                          : console.log("Autosave Off");
+                      }}
+                    />
+                  </th>
+                  <td className="px-6 py-4 w-[40%]">
+                    <input
+                      className="appearance-none bg-transparent border-none text-gray-700 mr-3 py-1 px-2 leading-tight focus:outline-none"
+                      type="date"
+                      defaultValue={e.Date}
+                      placeholder="Date"
+                      aria-label="Date"
+                      onChange={(event) => {
+                        setRow(
+                          [...row],
+                          (row.filter((id) => id.id === e.id)[0].Date =
+                            event.target.value)
+                        );
+                      }}
+                    />
+                  </td>
+                  <td className="px-6 py-4 w-[20%]">
+                    <select
+                      id="underline_select"
+                      className="block py-2.5 px-0 w-full text-sm text-gray-500 bg-transparent border-0 border-b-2 border-gray-200 appearance-none dark:text-gray-400 dark:border-gray-700 focus:outline-none focus:ring-0 focus:border-gray-200 peer"
+                      defaultValue={`${e["Appointment Library"]}`}
+                      onChange={(event) => {
+                        setRow(
+                          [...row],
+                          (row.filter((id) => id.id === e.id)[0][
+                            "Appointment Library"
+                          ] = event.target.value)
+                        );
+                      }}
+                    >
+                      <option value="" disabled>
+                        Choose a Library
+                      </option>
+                      <option value="0">OXVC TEST123</option>
+                      <option value="1">OXVC TEST</option>
+                      <option value="2">OXVC TEST</option>
+                      <option value="3">OXVC TEST</option>
+                    </select>
+                  </td>
+                </tr>
+                {/* first condition */}
+                {expand === index && (
+                  <tr className="">
+                    <td colSpan={3} className="">
+                      <div className="flex justify-center">
+                        <div className="w-[90%]">
+                          <div className="border-b-2 mb-1  px-2 mb-4">
+                            <div className="font-bold flex gap-[5px] text-[15px]">
+                              Appointment -
+                              <div className="font-normal">
+                                Total Records {e?.ApointmentData?.length || "0"}
+                              </div>
+                              <div className="flex gap-[5px] text-[15px] px-2">
+                                |{" "}
+                                <div
+                                  onClick={(e) => {
+                                    AddApointmentData(index);
+                                  }}
+                                >
+                                  <AddIcon />
+                                </div>{" "}
+                                <CloseSVG />
+                                <FunnelSVG /> <RefreshIcon />
+                                <div className="bg-sky-800 text-white">
+                                  Auto Save On
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                            <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                              <tr>
+                                <th scope="col" className=" flex px-6 py-3">
+                                  <input
+                                    className="mr-2"
+                                    type="checkbox"
+                                    onChange={() =>
+                                      handleInsideCheckboxChange(-1, index)
+                                    }
+                                    checked={insideselectedRows.includes(-1)}
+                                  />
+                                  Subject
+                                </th>
+                                <th scope="col" className="px-6 py-3">
+                                  Created On
+                                </th>
+                                <th scope="col" className="px-6 py-3">
+                                  Doctor
+                                </th>
+                                <th scope="col" className="px-6 py-3">
+                                  Start Time
+                                </th>
+                                <th scope="col" className="px-6 py-3">
+                                  End Time
+                                </th>
+                                <th scope="col" className="px-6 py-3">
+                                  Decription
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {e?.ApointmentData?.map((Data, key) => (
+                                <tr
+                                  key={key}
+                                  className="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
+                                >
+                                  <th
+                                    scope="row"
+                                    className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                                  >
+                                    <input
+                                      type="checkbox"
+                                      onChange={() =>
+                                        handleInsideCheckboxChange(Data.id)
+                                      }
+                                      checked={insideselectedRows.includes(
+                                        Data.id
+                                      )}
+                                    />
+                                    <input
+                                      className="appearance-none bg-transparent border-none w-full text-gray-700 mr-3 py-1 px-2 leading-tight focus:outline-none"
+                                      type="text"
+                                      defaultValue={Data.Subject}
+                                      placeholder="Subject"
+                                      aria-label="Subject"
+                                      onChange={(event) => {
+                                        setRow(
+                                          [...row],
+                                          (row
+                                            .filter((id) => id.id === e.id)[0]
+                                            .ApointmentData.filter(
+                                              (id) => id.id === Data.id
+                                            )[0].Subject = event.target.value)
+                                        );
+                                      }}
+                                    />
+                                  </th>
+                                  <td className="px-6 py-4">
+                                    <input
+                                      className="appearance-none bg-transparent border-none w-25  text-gray-700 mr-3 py-1 px-2 leading-tight focus:outline-none"
+                                      type="date"
+                                      defaultValue={Data["Created On"]}
+                                      placeholder="CreatedOn"
+                                      aria-label="CreatedOn"
+                                      onChange={(event) => {
+                                        setRow(
+                                          [...row],
+                                          (row
+                                            .filter((id) => id.id === e.id)[0]
+                                            .ApointmentData.filter(
+                                              (id) => id.id === Data.id
+                                            )[0]["Created On"] =
+                                            event.target.value)
+                                        );
+                                      }}
+                                    />
+                                  </td>
+                                  <td className="px-6 py-4">
+                                    {/* <input
+                                      className="appearance-none bg-transparent border-none w-full text-gray-700 mr-3 py-1 px-2 leading-tight focus:outline-none"
+                                      type="text"
+                                      defaultValue={e.Doctor}
+                                      placeholder="Doctor"
+                                      aria-label="Doctor"
+                                      onChange={(event)=>{ setRow([...row],row.filter((id)=>(id.id === e.id))[0].ApointmentData.filter((id)=>(id.id === e.id))[0].Doctor = event.target.value);}}
+                                    /> */}
+                                    <select
+                                      className="block py-2.5 px-0 w-fit text-sm text-gray-500 bg-transparent border-0 border-b-2 border-gray-200 appearance-none dark:text-gray-400 dark:border-gray-700 focus:outline-none focus:ring-0 focus:border-gray-200 peer"
+                                      defaultValue={Data.Doctor}
+                                      onChange={(event) => {
+                                        setRow(
+                                          [...row],
+                                          (row
+                                            .filter((id) => id.id === e.id)[0]
+                                            .ApointmentData.filter(
+                                              (id) => id.id === Data.id
+                                            )[0]["Created On"] =
+                                            event.target.value)
+                                        );
+                                      }}
+                                    >
+                                      <option value="" disabled>
+                                        Choose a Doctor
+                                      </option>
+                                      <option value="0">Doctor 1</option>
+                                      <option value="1">Doctor 2</option>
+                                      <option value="2">Doctor 3</option>
+                                      <option value="3">Doctor 4</option>
+                                    </select>
+                                  </td>
+                                  <td className="px-6 py-4">
+                                    <input
+                                      className="appearance-none bg-transparent border-none w-25 text-gray-700 mr-3 py-1 px-2 leading-tight focus:outline-none"
+                                      type="time"
+                                      defaultValue={Data["Start Time"]}
+                                      placeholder="StartTime"
+                                      aria-label="StartTime"
+                                      onChange={(event) => {
+                                        setRow(
+                                          [...row],
+                                          (row
+                                            .filter((id) => id.id === e.id)[0]
+                                            .ApointmentData.filter(
+                                              (id) => id.id === Data.id
+                                            )[0]["Start Time"] =
+                                            event.target.value)
+                                        );
+                                      }}
+                                    />
+                                  </td>
+                                  <td className="px-6 py-4">
+                                    <input
+                                      className="appearance-none bg-transparent border-none w-25  text-gray-700 mr-3 py-1 px-2 leading-tight focus:outline-none"
+                                      type="time"
+                                      defaultValue={Data["End Time"]}
+                                      placeholder="EndTime"
+                                      aria-label="EndTime"
+                                      onChange={(event) => {
+                                        setRow(
+                                          [...row],
+                                          (row
+                                            .filter((id) => id.id === e.id)[0]
+                                            .ApointmentData.filter(
+                                              (id) => id.id === Data.id
+                                            )[0]["End Time"] =
+                                            event.target.value)
+                                        );
+                                      }}
+                                    />
+                                  </td>
+                                  <td className="px-6 py-4">
+                                    <input
+                                      className="appearance-none bg-transparent border-none w-full text-gray-700 mr-3 py-1 px-2 leading-tight focus:outline-none"
+                                      type="text"
+                                      defaultValue={Data.Decription}
+                                      placeholder="Description"
+                                      aria-label="Description"
+                                      onChange={(event) => {
+                                        setRow(
+                                          [...row],
+                                          (row
+                                            .filter((id) => id.id === e.id)[0]
+                                            .ApointmentData.filter(
+                                              (id) => id.id === Data.id
+                                            )[0].Decription =
+                                            event.target.value)
+                                        );
+                                      }}
+                                    />
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
+  );
+}
+
+export default App;
